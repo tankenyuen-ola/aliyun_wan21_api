@@ -1,0 +1,5 @@
+.env
+.qodo
+videos/
+prompt_video_mapping.csv
+prompts.txt
