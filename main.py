@@ -5,6 +5,7 @@ import uuid
 import requests
 import csv
 from dotenv import load_dotenv
+from pathlib import Path
 
 load_dotenv()
 
@@ -26,8 +27,10 @@ MODELS = ["wan2.1-t2v-turbo", "wan2.1-t2v-plus"]
 SIZE = "720*1280"
 DURATION = "5"
 
-MAPPING_CSV = "/Users/kenyuen/Desktop/Flux/aliyun_wan21_api/prompt_video_mapping.csv"
-
+BASE_DIR = Path(__file__).resolve().parent
+MAPPING_CSV = BASE_DIR / "prompt_video_mapping.csv"
+PROMPTS_FILE = BASE_DIR / "prompts.txt"
+VIDEOS_DIR = BASE_DIR / "videos"
 # === HELPER FUNCTIONS ===
 
 def submit_task(model: str, prompt: str) -> str:
@@ -73,9 +76,9 @@ def wait_for_completion(task_id: str, poll_interval: int = 20, timeout: int = 60
 
 def download_video(model: str, task_id: str, video_url: str) -> str:
     """Download the MP4 and save it under videos/{uuid4}.mp4."""
-    os.makedirs("/Users/kenyuen/Desktop/Flux/aliyun_wan21_api/videos", exist_ok=True)
+    os.makedirs(VIDEOS_DIR, exist_ok=True)
     filename = f"{model}_{task_id}.mp4"
-    local_filename = os.path.join("/Users/kenyuen/Desktop/Flux/aliyun_wan21_api/videos", filename)
+    local_filename = os.path.join(VIDEOS_DIR, filename)
     with requests.get(video_url, stream=True) as r:
         r.raise_for_status()
         with open(local_filename, "wb") as f:
@@ -100,7 +103,7 @@ def record_mapping(model: str, task_id: str, prompt: str, filepath: str):
 
 def main():
     # Load prompts
-    with open("/Users/kenyuen/Desktop/Flux/aliyun_wan21_api/prompts.txt", "r", encoding="utf-8") as f:
+    with open(PROMPTS_FILE, "r", encoding="utf-8") as f:
         prompts = [line.strip() for line in f if line.strip()]
 
     for idx, prompt in enumerate(prompts, start=1):
